@@ -29,9 +29,5 @@ public class GlobalExceptionHandler {
         return Map.of("error", e.getMessage());
     }
 
-    @ExceptionHandler
-    public void handleDataAccessException(DataAccessException e) {
-
-    }
 
 }

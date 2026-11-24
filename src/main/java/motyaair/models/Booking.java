@@ -27,6 +27,6 @@ public class Booking {
     @Column(name = "expiration_date")
     private LocalDateTime expirationDate;
     @Column(name = "is_paid")
-    private Boolean isPaid;
+    private boolean isPaid;
 
 }

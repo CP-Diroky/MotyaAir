@@ -1,149 +1,194 @@
 package motyaair.mappers;
 
+import lombok.experimental.UtilityClass;
+import motyaair.dto.*;
+import motyaair.dto.UserDto.UserDto;
 import motyaair.models.*;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.LocalDateTime;
+import java.util.List;
 
+
+@UtilityClass
 public class RowMappers {
 
 
-    public static Airport airportRowMapper(ResultSet rs, int rowNum) throws SQLException {
-        Airport airport = new Airport();
-        airport.setId(rs.getLong(1));
-        airport.setAirportName(rs.getString(2));
-        airport.setCode(rs.getString(3));
-        airport.setCity(rs.getString(4));
-        airport.setCountry(rs.getString(5));
-        return airport;
+    public static AircraftDto aircraftDto(Aircraft aircraft) {
+        AircraftDto aircraftDto = new AircraftDto();
+        aircraftDto.setModel(aircraft.getModel());
+        return aircraftDto;
     }
 
-    public static Aircraft aircraftRowMapper(ResultSet rs, int rowNum) throws SQLException {
+    public static Aircraft aircraft(AircraftDto aircraftDto) {
         Aircraft aircraft = new Aircraft();
-        aircraft.setId(rs.getLong("id"));
-        aircraft.setModel(rs.getString("model"));
+        aircraft.setModel(aircraftDto.getModel());
         return aircraft;
     }
 
-    public static Flight flightRowMapper(ResultSet rs, int rowNum) throws SQLException {
-        Flight flight = new Flight();
-        flight.setId(rs.getLong("id"));
-        flight.setFlightNumber(rs.getString("flight_number"));
-
-        Aircraft aircraft = new Aircraft();
-        aircraft.setId(rs.getLong("aircraft_id"));
-        aircraft.setModel(rs.getString("model"));
-
-        Airport departureAirport = new Airport();
-        departureAirport.setId(rs.getLong("departure_airport_id"));
-        departureAirport.setAirportName(rs.getString("departure_airport_name"));
-        departureAirport.setCode(rs.getString("departure_airport_code"));
-        departureAirport.setCity(rs.getString("departure_airport_city"));
-        departureAirport.setCountry(rs.getString("departure_airport_country"));
-
-        Airport arrivalAirport = new Airport();
-        arrivalAirport.setId(rs.getLong("arrival_airport_id"));
-        arrivalAirport.setAirportName(rs.getString("arrival_airport_name"));
-        arrivalAirport.setCode(rs.getString("arrival_airport_code"));
-        arrivalAirport.setCity(rs.getString("arrival_airport_city"));
-        arrivalAirport.setCountry(rs.getString("arrival_airport_country"));
-
-        flight.setAircraft(aircraft);
-        flight.setDepartureAirport(departureAirport);
-        flight.setArrivalAirport(arrivalAirport);
-        flight.setDepartureTime(rs.getObject("departure_time", LocalDateTime.class));
-        flight.setArrivalTime(rs.getObject("arrival_time", LocalDateTime.class));
-        return flight;
+    public static AirportDto airportDto(Airport airport) {
+        AirportDto airportDto = new AirportDto();
+        airportDto.setAirportName(airport.getAirportName());
+        airportDto.setCode(airport.getCode());
+        airportDto.setCity(airport.getCity());
+        airportDto.setCountry(airport.getCountry());
+        return airportDto;
     }
 
-    public static Seat seatRowMapper(ResultSet rs, int rowNum) throws SQLException {
-        Seat seat = new Seat();
-        seat.setId(rs.getLong("id"));
-        seat.setSeatNumber(rs.getString("seat_number"));
-
-        Aircraft aircraft = new Aircraft();
-        aircraft.setId(rs.getLong("aircraft_id"));
-        aircraft.setModel(rs.getString("model"));
-
-        seat.setAircraft(aircraft);
-        seat.setSeatClass(SeatClass.valueOf(rs.getString("seat_class")));
-        return seat;
+    public static Airport airport(AirportDto airportDto) {
+        Airport airport = new Airport();
+        airport.setAirportName(airportDto.getAirportName());
+        airport.setCode(airportDto.getCode());
+        airport.setCity(airportDto.getCity());
+        airport.setCountry(airportDto.getCountry());
+        return airport;
     }
 
-    public static FlightSeat flightSeatRowMapper(ResultSet rs, int rowNum) throws SQLException {
-        FlightSeat flightSeat = new FlightSeat();
-        flightSeat.setId(rs.getLong("id"));
-
-        Seat seat = new Seat();
-        seat.setId(rs.getLong("seat_id"));
-        seat.setSeatNumber(rs.getString("seat_number"));
-
-        Aircraft aircraft = new Aircraft();
-        aircraft.setId(rs.getLong("aircraft_id"));
-        aircraft.setModel(rs.getString("model"));
-
-        seat.setAircraft(aircraft);
-        seat.setSeatClass(SeatClass.valueOf(rs.getString("seat_class")));
-
-        flightSeat.setSeat(seat);
-        flightSeat.setPrice(rs.getBigDecimal("price"));
-        flightSeat.setStatus(FlightSeatStatus.valueOf(rs.getString("status")));
-
-        Flight flight = new Flight();
-        flight = flightRowMapper(rs, rowNum);
-        flight.setId(rs.getLong("flight_id"));
-        flightSeat.setFlight(flight);
-
-        return flightSeat;
+    public static BookingDto bookingDto(Booking booking) {
+        BookingDto bookingDto = new BookingDto();
+        bookingDto.setFlightSeatDto(flightSeatDto(booking.getFlightSeat()));
+        bookingDto.setUserDto(userDto(booking.getUser()));
+        bookingDto.setPaid(booking.isPaid());
+        bookingDto.setExpirationDate(booking.getExpirationDate());
+        return bookingDto;
     }
 
-    public static User userRowMapper(ResultSet rs, int rowNum) throws SQLException {
-        User user = new User();
-        user.setId(rs.getLong("id"));
-        user.setFirstName(rs.getString("first_name"));
-        user.setLastName(rs.getString("last_name"));
-        user.setEmail(rs.getString("email"));
-        return user;
-    }
-
-    public static Booking bookingRowMapper(ResultSet rs, int rowNum) throws SQLException {
+    public static Booking booking(BookingDto bookingDto) {
         Booking booking = new Booking();
-        booking.setId(rs.getLong("id"));
-        booking.setExpirationDate(rs.getObject("expiration_date", LocalDateTime.class));
-        booking.setIsPaid(rs.getBoolean("is_paid"));
-
-        User user = userRowMapper(rs, rowNum);
-        user.setId(rs.getLong("user_id"));
-        booking.setUser(user);
-
-        FlightSeat flightSeat = new FlightSeat();
-        flightSeat.setId(rs.getLong("flight_seat_id"));
-
-        Seat seat = new Seat();
-        seat.setId(rs.getLong("seat_id"));
-        seat.setSeatNumber(rs.getString("seat_number"));
-
-        Aircraft aircraft = new Aircraft();
-        aircraft.setId(rs.getLong("aircraft_id"));
-        aircraft.setModel(rs.getString("model"));
-
-        seat.setAircraft(aircraft);
-        seat.setSeatClass(SeatClass.valueOf(rs.getString("seat_class")));
-
-        flightSeat.setSeat(seat);
-        flightSeat.setPrice(rs.getBigDecimal("price"));
-        flightSeat.setStatus(FlightSeatStatus.valueOf(rs.getString("status")));
-
-        booking.setFlightSeat(flightSeat);
-
-        Flight flight = flightRowMapper(rs, rowNum);
-        flight.setId(rs.getLong("flight_id"));
-        flightSeat.setFlight(flight);
-
+        if (bookingDto.getFlightSeatDto() != null) {
+            booking.setFlightSeat(flightSeat(bookingDto.getFlightSeatDto()));
+        }
+        booking.setUser(user(bookingDto.getUserDto()));
+        booking.setPaid(bookingDto.isPaid());
+        booking.setExpirationDate(bookingDto.getExpirationDate());
         return booking;
     }
 
+    public static List<BookingDto> bookingDtoList(List<Booking> bookingList) {
+       return bookingList.stream().map(RowMappers::bookingDto).toList();
+    }
+
+    public static FlightDto flightDto(Flight flight) {
+        FlightDto flightDto = new FlightDto();
+        flightDto.setFlightNumber(flight.getFlightNumber());
+        flightDto.setDepartureAirport(airportDto(flight.getDepartureAirport()));
+        flightDto.setArrivalAirport(airportDto(flight.getArrivalAirport()));
+        flightDto.setAircraft(aircraftDto(flight.getAircraft()));
+        flightDto.setDepartureTime(flight.getDepartureTime());
+        flightDto.setArrivalTime(flight.getArrivalTime());
+        return flightDto;
+    }
+
+    public static Flight flight(FlightDto flightDto) {
+        Flight flight = new Flight();
+        flight.setFlightNumber(flightDto.getFlightNumber());
+        flight.setDepartureAirport(airport(flightDto.getDepartureAirport()));
+        flight.setArrivalAirport(airport(flightDto.getArrivalAirport()));
+        flight.setAircraft(aircraft(flightDto.getAircraft()));
+        flight.setDepartureTime(flightDto.getDepartureTime());
+        flight.setArrivalTime(flightDto.getArrivalTime());
+        return flight;
+    }
+
+    public static List<FlightDto> flightDtoList(List<Flight> flights) {
+        return flights.stream().map(RowMappers::flightDto).toList();
+    }
+
+
+    public static FlightSeatDto flightSeatDto(FlightSeat flightSeat) {
+        FlightSeatDto flightSeatDto = new FlightSeatDto();
+        flightSeatDto.setFlight(flightDto(flightSeat.getFlight()));
+        flightSeatDto.setSeat(seatDto(flightSeat.getSeat()));
+        flightSeatDto.setPrice(flightSeat.getPrice());
+        flightSeatDto.setStatus(flightSeat.getStatus());
+        return flightSeatDto;
+    }
+
+    public static FlightSeat flightSeat(FlightSeatDto flightSeatDto) {
+        FlightSeat flightSeat = new FlightSeat();
+        flightSeat.setFlight(flight(flightSeatDto.getFlight()));
+        flightSeat.setSeat(seat(flightSeatDto.getSeat()));
+        flightSeat.setPrice(flightSeatDto.getPrice());
+        flightSeat.setStatus(flightSeatDto.getStatus());
+        return flightSeat;
+    }
+
+    public static List<FlightSeatDto> flightSeatDtoList(List<FlightSeat> flightSeatList) {
+        return flightSeatList.stream().map(RowMappers::flightSeatDto).toList();
+    }
+
+    public static List<FlightSeat> flightSeatList(List<FlightSeatDto> flightSeatDtoList) {
+        return flightSeatDtoList.stream().map(RowMappers::flightSeat).toList();
+    }
+
+
+    public static PassengerDto passengerDto(Passenger passenger) {
+        PassengerDto passengerDto = new PassengerDto();
+        passengerDto.setFirstName(passenger.getFirstName());
+        passengerDto.setLastName(passenger.getLastName());
+        return passengerDto;
+    }
+
+    public static Passenger passenger(PassengerDto passengerDto) {
+        Passenger passenger = new Passenger();
+        passenger.setFirstName(passengerDto.getFirstName());
+        passenger.setLastName(passengerDto.getLastName());
+        return passenger;
+    }
+
+    public static SeatDto seatDto(Seat seat) {
+        SeatDto seatDto = new SeatDto();
+        seatDto.setSeatNumber(seat.getSeatNumber());
+        seatDto.setAircraft(aircraftDto(seat.getAircraft()));
+        seatDto.setSeatClass(seat.getSeatClass());
+        return seatDto;
+    }
+
+    public static Seat seat(SeatDto seatDto) {
+        Seat seat = new Seat();
+        seat.setSeatNumber(seatDto.getSeatNumber());
+        seat.setAircraft(aircraft(seatDto.getAircraft()));
+        seat.setSeatClass(seatDto.getSeatClass());
+        return seat;
+    }
+
+    public static List<Seat> seatList(List<SeatDto> seatDtos) {
+        return seatDtos.stream().map(RowMappers::seat).toList();
+    }
+
+    public static List<SeatDto> seatDtoList(List<Seat> seats) {
+        return seats.stream().map(RowMappers::seatDto).toList();
+    }
+
+    public static TicketDto ticketDto(Ticket ticket) {
+        TicketDto ticketDto = new TicketDto();
+        ticketDto.setTicketNumber(ticket.getTicketNumber());
+        ticketDto.setPassenger(passengerDto(ticket.getPassenger()));
+        ticketDto.setBooking(bookingDto(ticket.getBooking()));
+        return ticketDto;
+    }
+
+    public static Ticket ticket(TicketDto ticketDto) {
+        Ticket ticket = new Ticket();
+        ticket.setTicketNumber(ticketDto.getTicketNumber());
+        ticket.setPassenger(passenger(ticketDto.getPassenger()));
+        ticket.setBooking(booking(ticketDto.getBooking()));
+        return ticket;
+    }
+
+    public static UserDto userDto(User user) {
+        UserDto userDto = new UserDto();
+        userDto.setEmail(user.getEmail());
+        userDto.setFirstName(user.getFirstName());
+        userDto.setLastName(user.getLastName());
+        return userDto;
+    }
+
+    public static User user(UserDto userDto) {
+        User user = new User();
+        user.setEmail(userDto.getEmail());
+        user.setFirstName(userDto.getFirstName());
+        user.setLastName(userDto.getLastName());
+        return user;
+    }
 
 
 }
